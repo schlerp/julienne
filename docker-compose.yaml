@@ -1,0 +1,42 @@
+version: '3'
+services:
+  redis:
+    image: redis:latest
+    hostname: redis
+
+  # rabbit:
+  #   hostname: rabbit
+  #   image: rabbitmq:latest
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=admin
+  #     - RABBITMQ_DEFAULT_PASS=mypass
+  
+  julienne:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: julienne
+    command: ./scripts/run_julienne.sh
+    volumes:
+      - .:/app
+    links:
+      # - rabbit
+      - redis
+    depends_on:
+      # - rabbit
+      - redis
+      - worker
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./scripts/run_julienne_worker.sh
+    volumes:
+      - .:/app
+    links:
+      # - rabbit
+      - redis
+    depends_on:
+      # - rabbit
+      - redis
