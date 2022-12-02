@@ -1,4 +1,5 @@
-task_serializer = "msgpack"
+# task_serializer = "msgpack"
+task_serializer = "pickle"
 
 # for signed messages
 # security_key = "/etc/ssl/private/worker.key"

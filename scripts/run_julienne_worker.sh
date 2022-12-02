@@ -2,5 +2,5 @@
 
 
 cd /app
-celery -A julienne worker --loglevel INFO 
+celery -A julienne worker
 
