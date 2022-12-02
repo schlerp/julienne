@@ -2,5 +2,5 @@
 
 cd /app
 echo running
-python -m julienne 100000
+python -m julienne 10000
 echo done

@@ -1,11 +1,10 @@
 from typing import Callable
 from typing import Generic
-from typing import Optional
 from typing import Type
 from typing import TypeVar
+from uuid import UUID
 from uuid import uuid4
 
-from pydantic import UUID4
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import validator
@@ -22,7 +21,7 @@ G_Output = TypeVar("G_Output", bound=Schema | None)
 
 
 class UniqueNamed(BaseModel):
-    uuid: UUID4 = Field(default_factory=uuid4)
+    uuid: UUID = Field(default_factory=uuid4)
     name: str = Field(default=None)
 
     @validator("name", always=True)
