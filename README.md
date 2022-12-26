@@ -6,6 +6,12 @@ The idea is that you can compose a set of python actions into a `flow` which is 
 
 > Currently this software is just some code testing different celery settings. Its not an integration engin yet!
 
+## Usage
+
+```bash
+poetry run python -m julienne
+```
+
 ## Authors
 
 * [PattyC](https://github.com/schlerp)
