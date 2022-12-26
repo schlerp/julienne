@@ -9,7 +9,10 @@ The idea is that you can compose a set of python actions into a `flow` which is 
 ## Usage
 
 ```bash
+
+# this is how i run during dev
 poetry run python -m julienne
+
 ```
 
 ## Authors
