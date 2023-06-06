@@ -12,6 +12,14 @@ pydantic = "^1.10.2"
 flower = "^1.2.0"
 
 
+[tool.poetry.group.test.dependencies]
+pytest = "^7.3.1"
+pytest-cov = "^4.1.0"
+pytest-sugar = "^0.9.7"
+
+[tool.pytest.ini_options]
+addopts = "--cov=julienne --cov-report term-missing"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
