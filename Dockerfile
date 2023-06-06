@@ -23,6 +23,11 @@ RUN python3 -m pip install poetry
 
 RUN mkdir /app
 WORKDIR /app
-COPY . /app
+COPY ./pyproject.toml /app/pyproject.toml
 
 RUN cd /app && poetry export -f requirements.txt --output requirements.txt && pip install -r /app/requirements.txt
+
+COPY ./certificate.crt /etc/ssl/certificate.crt
+COPY ./private.key /etc/ssl/private.key
+
+COPY . /app

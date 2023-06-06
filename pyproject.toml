@@ -7,8 +7,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-celery = {extras = ["msgpack", "redis"], version = "^5.2.7"}
+celery = {extras = ["msgpack", "redis", "auth"], version = "^5.2.7"}
 pydantic = "^1.10.2"
+flower = "^1.2.0"
 
 
 [build-system]

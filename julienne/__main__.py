@@ -120,7 +120,6 @@ test_person = Person(
 
 
 if __name__ == "__main__":
-
     LOGGER.error("Julienne running!")
 
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 1000

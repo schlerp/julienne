@@ -1,0 +1,7 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: "{{ .Values.name }}-ConfigMap-v1"
+  namespace: {{ .Values.namespace }}
+data:
+  key: value

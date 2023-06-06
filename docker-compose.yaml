@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   redis:
     image: redis:latest
@@ -10,7 +10,7 @@ services:
   #   environment:
   #     - RABBITMQ_DEFAULT_USER=admin
   #     - RABBITMQ_DEFAULT_PASS=mypass
-  
+
   julienne:
     build:
       context: .
@@ -40,3 +40,22 @@ services:
     depends_on:
       # - rabbit
       - redis
+
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./scripts/run_celery_flower.sh
+    volumes:
+      - .:/app
+    links:
+      # - rabbit
+      - redis
+    ports:
+      - "5555:5555"
+    environment:
+      #- CELERY_BROKER_URL="redis://redis:6379/0"
+      - CELERY_BROKER_URL="redis://redis"
+    depends_on:
+      - redis
+      - worker

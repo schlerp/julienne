@@ -1,0 +1,7 @@
+name: julienne
+
+namespace: default
+
+image:
+  name: julienne
+  label: latest

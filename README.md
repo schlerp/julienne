@@ -10,11 +10,14 @@ The idea is that you can compose a set of python actions into a `flow` which is 
 
 ```bash
 
-# this is how i run during dev
-poetry run python -m julienne
+# gen your ssl key pairs
+./scripts/gen_ssl_key_pair.sh
+
+# run docker compose build/tail/teardown
+docker-compose up --build --scale worker=2 -d && docker-compose logs -f julienne && docker-compose down -v --remove-orphans
 
 ```
 
 ## Authors
 
-* [PattyC](https://github.com/schlerp)
+- [PattyC](https://github.com/schlerp)
