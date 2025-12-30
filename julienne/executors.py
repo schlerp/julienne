@@ -22,9 +22,6 @@ def execute_block(block: Block[G_Input, G_Output], data: G_Input) -> G_Output:
 
 
 def execute_flow(flow: Flow, data: Schema) -> Schema | None:
-    try:
-        for block in flow.blocks:
-            data = execute_block(block=block, data=data)
-        return data
-    except Exception:
-        LOGGER.exception(f"{flow.name} failed to run with the following exception!")
+    for block in flow.blocks:
+        data = execute_block(block=block, data=data)
+    return data

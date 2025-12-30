@@ -50,7 +50,6 @@ def print_test_summary(times: List[float]) -> None:
 
 
 if __name__ == "__main__":
-
     LOGGER.error("im python!")
     n = int(sys.argv[2]) if len(sys.argv) == 3 else 1000
 

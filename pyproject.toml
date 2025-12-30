@@ -1,25 +1,29 @@
-[tool.poetry]
+[project]
 name = "julienne"
 version = "0.1.0"
 description = "An integration engine built in python on celery."
-authors = ["PattyC <patrickcoffey91@gmail.com>"]
+authors = [{ name = "PattyC", email = "patrickcoffey91@gmail.com" }]
+requires-python = ">=3.10,<4"
 readme = "README.md"
+dependencies = [
+    "celery[msgpack, redis, auth]>=5.2.7,<6",
+    "pydantic>=1.10.2,<2",
+    "flower>=1.2.0,<2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-celery = {extras = ["msgpack", "redis", "auth"], version = "^5.2.7"}
-pydantic = "^1.10.2"
-flower = "^1.2.0"
+[dependency-groups]
+test = [
+    "pytest>=7.3.1,<8",
+    "pytest-cov>=4.1.0,<5",
+    "pytest-sugar>=0.9.7,<0.10",
+]
 
+[tool.uv]
+default-groups = ["test"]
 
-[tool.poetry.group.test.dependencies]
-pytest = "^7.3.1"
-pytest-cov = "^4.1.0"
-pytest-sugar = "^0.9.7"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = "--cov=julienne --cov-report term-missing"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
