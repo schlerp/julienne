@@ -11,9 +11,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 def execute_block(block: Block[G_Input, G_Output], data: G_Input) -> G_Output:
-    if type(data) != block.input_schema:
+    if type(data) is not block.input_schema:
         LOGGER.error(
-            f"{data}, {block.input_schema}, {type(data) == block.input_schema}"
+            f"{data}, {block.input_schema}, {type(data) is block.input_schema}"
         )
         raise InvalidInputDataException("aww shiet..")
     LOGGER.debug(f"executing block: {block.name}")
@@ -21,11 +21,10 @@ def execute_block(block: Block[G_Input, G_Output], data: G_Input) -> G_Output:
     return result
 
 
-def execute_flow(flow: Flow, data: Schema) -> bool:
+def execute_flow(flow: Flow, data: Schema) -> Schema | None:
     try:
         for block in flow.blocks:
             data = execute_block(block=block, data=data)
-        return True
+        return data
     except Exception:
         LOGGER.exception(f"{flow.name} failed to run with the following exception!")
-        return False
