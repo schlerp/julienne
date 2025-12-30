@@ -36,7 +36,7 @@ A simple local pipeline can look like this:
 from julienne.pipeline import Pipeline
 from julienne.schemas import Block, Flow
 from julienne.sources.filesystem import JsonArrayFileDataSource
-from julienne.sinks.filesystem import JsonHashDirSink
+from julienne.sinks.filesystem import JsonHashDirSink, JsonLinesSink
 
 from your_module import Person, PersonNoDOB, strip_dob
 
@@ -49,8 +49,9 @@ block = Block[Person, PersonNoDOB](
 )
 flow = Flow(name="<Example Flow>", blocks=[block])
 sink = JsonHashDirSink("out_dir")
+error_sink = JsonLinesSink("errors.jsonl")
 
-pipeline = Pipeline(source=source, flow=flow, sink=sink)
+pipeline = Pipeline(source=source, flow=flow, sink=sink, error_sink=error_sink)
 
 # Run locally, in-process
 pipeline.run()
@@ -58,6 +59,8 @@ pipeline.run()
 # Or run via Celery tasks (requires broker + worker)
 pipeline.run_celery()
 ```
+
+Each failed item is captured as a `PipelineItemError` and written as a single JSON document per line into `errors.jsonl`.
 
 For testing, Celery can be run in *eager* mode so tasks execute synchronously in the same process. See `tests/test_pipeline.py` for an example that temporarily sets `app.conf.task_always_eager = True` while exercising the Celery-backed pipeline.
 

@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 from julienne.celery import app
 from julienne.pipeline import Pipeline
-from julienne.schemas import Block, Flow, Schema
+from julienne.schemas import Block, Flow, Schema, PipelineItemError
 from julienne.sources.base import IteratorDataSource
 from julienne.sources.filesystem import JsonArrayFileDataSource
 from julienne.sinks.base import DataSink
@@ -36,6 +36,15 @@ class CollectSink(DataSink):
 
     def process(self, data: List[Schema]) -> None:
         self.items.extend(data)
+
+
+class CollectErrorSink(DataSink):
+    def __init__(self) -> None:
+        self.items: List[PipelineItemError] = []
+
+    def process(self, data: List[Schema]) -> None:  # type: ignore[override]
+        # In tests we know this will receive PipelineItemError instances.
+        self.items.extend(data)  # type: ignore[arg-type]
 
 
 def test_pipeline_runs_flow_over_iterator_source():
@@ -168,3 +177,76 @@ def test_pipeline_run_celery_eager_mode(monkeypatch):
     assert len(sink.items) == 3
     assert all(isinstance(item, PersonNoDOB) for item in sink.items)
     assert all(not hasattr(item, "dob") for item in sink.items)
+
+
+def test_pipeline_captures_item_errors_with_error_sink():
+    raw_items: List[Dict[str, Any]] = [
+        {"first_name": "Good", "last_name": "User", "dob": datetime.now()},
+        {"first_name": "Bad", "last_name": "User"},  # missing dob, should fail
+        {"first_name": "AlsoGood", "last_name": "User", "dob": datetime.now()},
+    ]
+    source = IteratorDataSource(raw_items)
+
+    block: Block[Person, PersonNoDOB] = Block(
+        name="[Remove DOB]",
+        input_schema=Person,
+        output_schema=PersonNoDOB,
+        function=strip_dob,
+    )
+    flow = Flow(name="<Error Test Flow>", blocks=[block])
+
+    sink = CollectSink()
+    error_sink = CollectErrorSink()
+    pipeline = Pipeline(source=source, flow=flow, sink=sink, error_sink=error_sink)
+
+    pipeline.run()
+
+    # Two good items should be processed successfully.
+    assert len(sink.items) == 2
+    assert all(isinstance(item, PersonNoDOB) for item in sink.items)
+
+    # One bad item should be captured as an error.
+    assert len(error_sink.items) == 1
+    err = error_sink.items[0]
+    assert isinstance(err, PipelineItemError)
+    assert err.flow_name == flow.name
+    assert err.item_index == 1
+    assert err.item["first_name"] == "Bad"
+
+
+def test_pipeline_captures_item_errors_with_error_sink_celery_eager(monkeypatch):
+    raw_items: List[Dict[str, Any]] = [
+        {"first_name": "Good", "last_name": "User", "dob": datetime.now()},
+        {"first_name": "Bad", "last_name": "User"},  # missing dob, should fail
+        {"first_name": "AlsoGood", "last_name": "User", "dob": datetime.now()},
+    ]
+    source = IteratorDataSource(raw_items)
+
+    block: Block[Person, PersonNoDOB] = Block(
+        name="[Remove DOB]",
+        input_schema=Person,
+        output_schema=PersonNoDOB,
+        function=strip_dob,
+    )
+    flow = Flow(name="<Celery Error Test Flow>", blocks=[block])
+
+    sink = CollectSink()
+    error_sink = CollectErrorSink()
+    pipeline = Pipeline(source=source, flow=flow, sink=sink, error_sink=error_sink)
+
+    previous_eager = app.conf.task_always_eager
+    app.conf.task_always_eager = True
+    try:
+        pipeline.run_celery()
+    finally:
+        app.conf.task_always_eager = previous_eager
+
+    assert len(sink.items) == 2
+    assert all(isinstance(item, PersonNoDOB) for item in sink.items)
+
+    assert len(error_sink.items) == 1
+    err = error_sink.items[0]
+    assert isinstance(err, PipelineItemError)
+    assert err.flow_name == flow.name
+    assert err.item_index == 1
+    assert err.item["first_name"] == "Bad"

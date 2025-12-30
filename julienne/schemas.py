@@ -1,5 +1,8 @@
+from typing import Any
 from typing import Callable
+from typing import Dict
 from typing import Generic
+from typing import Optional
 from typing import Type
 from typing import TypeVar
 from uuid import UUID
@@ -40,3 +43,10 @@ class Block(UniqueNamed, GenericModel, Generic[G_Input, G_Output]):
 
 class Flow(UniqueNamed):
     blocks: list[Block]
+
+
+class PipelineItemError(Schema):
+    flow_name: str
+    error: str
+    item_index: Optional[int] = None
+    item: Dict[str, Any]
