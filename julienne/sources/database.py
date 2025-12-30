@@ -5,7 +5,6 @@ from typing import List
 import sqlparse
 from pypyodbc import Connection
 
-from julienne.exceptions import MissingSelectClauseException
 from julienne.exceptions import MoreThanOneStatementException
 from julienne.sources.base import DataSource
 

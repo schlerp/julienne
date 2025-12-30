@@ -56,12 +56,26 @@ def run_demo_filesystem(
 def main(argv: List[str] | None = None) -> None:
     logging.basicConfig(level=logging.INFO)
 
-    parser = argparse.ArgumentParser(prog="julienne", description="Julienne integration engine demo CLI")
+    parser = argparse.ArgumentParser(
+        prog="julienne",
+        description="Julienne integration engine demo CLI",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    demo_fs = subparsers.add_parser("demo-filesystem", help="Run a simple filesystem-based demo pipeline")
-    demo_fs.add_argument("--input-json", required=True, help="Path to input JSON array file")
-    demo_fs.add_argument("--output-dir", required=True, help="Directory to write output JSON files")
+    demo_fs = subparsers.add_parser(
+        "demo-filesystem",
+        help="Run a simple filesystem-based demo pipeline",
+    )
+    demo_fs.add_argument(
+        "--input-json",
+        required=True,
+        help="Path to input JSON array file",
+    )
+    demo_fs.add_argument(
+        "--output-dir",
+        required=True,
+        help="Directory to write output JSON files",
+    )
     demo_fs.add_argument(
         "--error-jsonl",
         help="Optional path to write per-record errors as JSON lines",

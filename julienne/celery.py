@@ -7,4 +7,4 @@ app.config_from_object("julienne.celeryconfig")
 
 # app.setup_security()
 
-from . import tasks
+from . import tasks  # noqa: E402,F401

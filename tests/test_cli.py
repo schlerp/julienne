@@ -29,9 +29,11 @@ def test_demo_filesystem_cli(tmp_path):
     ]
 
     try:
-        result = run(cmd, capture_output=True, text=True, check=True)
+        run(cmd, capture_output=True, text=True, check=True)
     except CalledProcessError as exc:
-        raise AssertionError(f"CLI failed with code {exc.returncode}: {exc.stderr}") from exc
+        raise AssertionError(
+            f"CLI failed with code {exc.returncode}: {exc.stderr}"
+        ) from exc
 
     written_files = list(output_dir.glob("*.json"))
     assert len(written_files) == 2
