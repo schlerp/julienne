@@ -32,3 +32,15 @@ class JsonHashDirSink(DataSink):
     def process(self, data: List[Schema]):
         for x in data:
             self._write_file(x.json())
+
+
+class JsonLinesSink(DataSink):
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def process(self, data: List[Schema]):
+        # Append one JSON document per line for each item.
+        with open(self.file_path, "a") as f:
+            for x in data:
+                f.write(x.json())
+                f.write("\n")
