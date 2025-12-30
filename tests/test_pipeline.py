@@ -4,6 +4,7 @@ import tempfile
 from datetime import datetime
 from typing import Any, Dict, List
 
+from julienne.celery import app
 from julienne.pipeline import Pipeline
 from julienne.schemas import Block, Flow, Schema
 from julienne.sources.base import IteratorDataSource
@@ -136,3 +137,34 @@ def test_filesystem_end_to_end_pipeline(tmp_path):
 
     loaded = [json.loads(p.read_text()) for p in written_files]
     assert all("dob" not in item for item in loaded)
+
+
+def test_pipeline_run_celery_eager_mode(monkeypatch):
+    raw_items: List[Dict[str, Any]] = [
+        {"first_name": "First", "last_name": "Last", "dob": datetime.now()}
+        for _ in range(3)
+    ]
+    source = IteratorDataSource(raw_items)
+
+    block: Block[Person, PersonNoDOB] = Block(
+        name="[Remove DOB]",
+        input_schema=Person,
+        output_schema=PersonNoDOB,
+        function=strip_dob,
+    )
+    flow = Flow(name="<Celery Test Flow>", blocks=[block])
+
+    sink = CollectSink()
+    pipeline = Pipeline(source=source, flow=flow, sink=sink)
+
+    # Enable eager mode so Celery tasks run synchronously during the test.
+    previous_eager = app.conf.task_always_eager
+    app.conf.task_always_eager = True
+    try:
+        pipeline.run_celery()
+    finally:
+        app.conf.task_always_eager = previous_eager
+
+    assert len(sink.items) == 3
+    assert all(isinstance(item, PersonNoDOB) for item in sink.items)
+    assert all(not hasattr(item, "dob") for item in sink.items)
