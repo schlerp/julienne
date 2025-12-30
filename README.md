@@ -26,6 +26,41 @@ uv run python -m julienne demo-filesystem \
 
 `people.json` should be a JSON array of objects with at least `first_name`, `last_name`, and `dob` fields. The demo flow removes `dob` from each item and writes one JSON file per record into the output directory.
 
+## Pipelines and Celery
+
+At a lower level, Julienne exposes a `Pipeline` abstraction that wires together a `DataSource`, `Flow`, and `DataSink`.
+
+A simple local pipeline can look like this:
+
+```python
+from julienne.pipeline import Pipeline
+from julienne.schemas import Block, Flow
+from julienne.sources.filesystem import JsonArrayFileDataSource
+from julienne.sinks.filesystem import JsonHashDirSink
+
+from your_module import Person, PersonNoDOB, strip_dob
+
+source = JsonArrayFileDataSource("people.json")
+block = Block[Person, PersonNoDOB](
+    name="[Remove DOB]",
+    input_schema=Person,
+    output_schema=PersonNoDOB,
+    function=strip_dob,
+)
+flow = Flow(name="<Example Flow>", blocks=[block])
+sink = JsonHashDirSink("out_dir")
+
+pipeline = Pipeline(source=source, flow=flow, sink=sink)
+
+# Run locally, in-process
+pipeline.run()
+
+# Or run via Celery tasks (requires broker + worker)
+pipeline.run_celery()
+```
+
+For testing, Celery can be run in *eager* mode so tasks execute synchronously in the same process. See `tests/test_pipeline.py` for an example that temporarily sets `app.conf.task_always_eager = True` while exercising the Celery-backed pipeline.
+
 ## Docker / Celery (original experiment)
 
 The original Docker/Celery experiment is still available via the compose setup:
