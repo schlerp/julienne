@@ -1,10 +1,15 @@
+import json
+import os
+import tempfile
 from datetime import datetime
 from typing import Any, Dict, List
 
 from julienne.pipeline import Pipeline
 from julienne.schemas import Block, Flow, Schema
 from julienne.sources.base import IteratorDataSource
+from julienne.sources.filesystem import JsonArrayFileDataSource
 from julienne.sinks.base import DataSink
+from julienne.sinks.filesystem import JsonHashDirSink
 
 
 class Person(Schema):
@@ -96,3 +101,38 @@ def test_pipeline_accepts_schema_instances_from_source():
 
     assert len(sink.items) == 2
     assert all(isinstance(item, PersonNoDOB) for item in sink.items)
+
+
+def test_filesystem_end_to_end_pipeline(tmp_path):
+    input_file = tmp_path / "people.json"
+    output_dir = tmp_path / "out"
+    output_dir.mkdir()
+
+    people_payload = [
+        {"first_name": "First", "last_name": "Last", "dob": datetime.now().isoformat()},
+        {"first_name": "Foo", "last_name": "Bar", "dob": datetime.now().isoformat()},
+    ]
+
+    with input_file.open("w") as f:
+        json.dump(people_payload, f)
+
+    source = JsonArrayFileDataSource(str(input_file))
+
+    block: Block[Person, PersonNoDOB] = Block(
+        name="[Remove DOB]",
+        input_schema=Person,
+        output_schema=PersonNoDOB,
+        function=strip_dob,
+    )
+    flow = Flow(name="<FS Flow>", blocks=[block])
+
+    sink = JsonHashDirSink(str(output_dir))
+    pipeline = Pipeline(source=source, flow=flow, sink=sink)
+
+    pipeline.run()
+
+    written_files = list(output_dir.glob("*.json"))
+    assert len(written_files) == 2
+
+    loaded = [json.loads(p.read_text()) for p in written_files]
+    assert all("dob" not in item for item in loaded)
