@@ -23,6 +23,23 @@ uv run python -m julienne ...
 
 ## Quickstart (local demo)
 
+## Development
+
+For day-to-day development, you can use `uv` to run tests and local commands without managing a separate virtual environment explicitly:
+
+```bash
+# Run the test suite
+uv run pytest
+
+# Run the CLI entrypoint
+uv run python -m julienne demo-filesystem \
+  --input-json path/to/people.json \
+  --output-dir /tmp/julienne-out
+```
+
+If you prefer a traditional virtual environment, you can still create one and install from `requirements.txt` instead; the project layout and lockfile (`uv.lock`) remain the same.
+
+
 Run the test suite (optional but recommended):
 
 ```bash
