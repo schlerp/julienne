@@ -8,7 +8,37 @@ You compose a set of Python actions into a `Flow`, then run that flow over data 
 
 This project is still experimental and not production-ready.
 
+## Installation / dependencies
+
+Julienne is configured as a standard Python project using PEP 621, hatchling, and [uv](https://github.com/astral-sh/uv) for dependency management.
+
+- Runtime dependencies are declared in `pyproject.toml` and mirrored in `requirements.txt`.
+- A locked set of dependencies (including Celery) is tracked in `uv.lock`.
+- You can run commands with dependencies resolved via `uv`:
+
+```bash
+uv run pytest
+uv run python -m julienne ...
+```
+
 ## Quickstart (local demo)
+
+## Development
+
+For day-to-day development, you can use `uv` to run tests and local commands without managing a separate virtual environment explicitly:
+
+```bash
+# Run the test suite
+uv run pytest
+
+# Run the CLI entrypoint
+uv run python -m julienne demo-filesystem \
+  --input-json path/to/people.json \
+  --output-dir /tmp/julienne-out
+```
+
+If you prefer a traditional virtual environment, you can still create one and install from `requirements.txt` instead; the project layout and lockfile (`uv.lock`) remain the same.
+
 
 Run the test suite (optional but recommended):
 
@@ -64,17 +94,11 @@ Each failed item is captured as a `PipelineItemError` and written as a single JS
 
 For testing, Celery can be run in *eager* mode so tasks execute synchronously in the same process. See `tests/test_pipeline.py` for an example that temporarily sets `app.conf.task_always_eager = True` while exercising the Celery-backed pipeline.
 
-## Docker / Celery (original experiment)
+## Historical Docker / Celery experiment
 
-The original Docker/Celery experiment is still available via the compose setup:
+An earlier version of this project included a Docker/Compose-based Celery setup. That configuration has been removed in favor of a simpler, local-first workflow driven by `uv` and standard Python tooling.
 
-```bash
-# gen your ssl key pairs
-./scripts/gen_ssl_key_pair.sh
-
-# run docker compose build/tail/teardown
-docker-compose up --build --scale worker=2 -d && docker-compose logs -f julienne && docker-compose down -v --remove-orphans
-```
+If you need containerization, you can layer your own Docker/Compose setup on top of the current `pyproject.toml`, `requirements.txt`, and `uv.lock`.
 
 ## Authors
 
