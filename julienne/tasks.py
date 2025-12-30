@@ -7,7 +7,7 @@ from typing import TypeVar
 
 from julienne.celery import app
 from julienne.executors import execute_flow
-from julienne.schemas import Flow
+from julienne.schemas import Flow, Schema
 
 R = TypeVar
 
@@ -26,5 +26,5 @@ def run_arbitrary_func(
 
 
 @app.task
-def run_flow(flow: Flow, data: Any) -> bool:
+def run_flow(flow: Flow, data: Schema) -> Schema | None:
     return execute_flow(flow=flow, data=data)
