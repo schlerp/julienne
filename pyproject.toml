@@ -17,9 +17,13 @@ test = [
     "pytest-cov>=4.1.0,<5",
     "pytest-sugar>=0.9.7,<0.10",
 ]
+dev = [
+    "ruff>=0.6,<0.7",
+    "pre-commit>=3.8,<4",
+]
 
 [tool.uv]
-default-groups = ["test"]
+default-groups = ["test", "dev"]
 
 [build-system]
 requires = ["hatchling"]
@@ -27,3 +31,18 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = "--cov=julienne --cov-report term-missing"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+
