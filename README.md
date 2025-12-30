@@ -28,6 +28,9 @@ uv run python -m julienne ...
 For day-to-day development, you can use `uv` to run tests and local commands without managing a separate virtual environment explicitly:
 
 ```bash
+# Install dependencies (including dev tools like ruff and pre-commit)
+uv sync --all-extras --dev
+
 # Run the test suite
 uv run pytest
 
@@ -36,6 +39,36 @@ uv run python -m julienne demo-filesystem \
   --input-json path/to/people.json \
   --output-dir /tmp/julienne-out
 ```
+
+### Linting and formatting (ruff)
+
+Julienne uses [ruff](https://github.com/astral-sh/ruff) as the single tool for linting and formatting.
+
+To run ruff manually:
+
+```bash
+uv run ruff check .
+uv run ruff format .
+```
+
+### pre-commit hooks
+
+A basic pre-commit configuration is provided at `.pre-commit-config.yaml` and runs ruff for you on changed files.
+
+To enable pre-commit locally:
+
+```bash
+uv run pre-commit install
+uv run pre-commit run --all-files  # optional initial run
+```
+
+### CI
+
+GitHub Actions CI is configured in `.github/workflows/ci.yaml` and will, on each push/PR against `main`:
+
+- Install dependencies with `uv sync --all-extras --dev`
+- Run `uv run ruff check .`
+- Run `uv run pytest`
 
 If you prefer a traditional virtual environment, you can still create one and install from `requirements.txt` instead; the project layout and lockfile (`uv.lock`) remain the same.
 
